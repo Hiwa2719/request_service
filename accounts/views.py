@@ -59,3 +59,6 @@ def change_password(request):
             return Response(serializer.data)
         return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     return Response({'error': 'Sorry Old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+#  todo creating a view for password reset
