@@ -53,6 +53,21 @@ class UserCreationSerializer(serializers.Serializer):
         send_mail(subject='Email Verification', message='Your Email verification Link',
                   from_email='hiahmadyan@gmail.com', recipient_list=[user.email], html_message=message)
 
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password')
+        profile_type = validated_data.pop('type')
+        queryset = User.objects.filter(username=instance.username)
+        queryset.update(**validated_data)
+        user = queryset.first()
+        if password:
+            user.set_password(password)
+            user.save()
+        if profile_type:
+            profile = user.profile
+            profile.type = profile_type
+            profile.save()
+        return user
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
