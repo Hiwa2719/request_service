@@ -7,4 +7,5 @@ app_name = 'accounts'
 urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
+    path('activate/<str:uidb64>/<str:token>/', views.activate_email, name='activate-email')
 ]

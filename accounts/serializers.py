@@ -1,6 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth import password_validation
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
 
 from .models import Profile, USER_TYPES
@@ -31,9 +37,20 @@ class UserCreationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         profile_type = validated_data.pop('type')
-        user = User.objects.create_user(username=validated_data['email'], **validated_data)
+        user = User.objects.create_user(username=validated_data['email'], is_active=False, **validated_data)
         Profile.objects.create(type=profile_type, user=user)
+        self.send_email(user)
         return user
+
+    def send_email(self, user):
+        message = render_to_string('accounts/email_template.html', {
+            'user': user,
+            'domain': get_current_site(request=self._context['request']).domain,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': default_token_generator.make_token(user),
+        })
+        send_mail(subject='Email Verification', message='Your Email verification Link',
+                  from_email='hiahmadyan@gmail.com', recipient_list=[user.email], html_message=message)
 
 
 class UserSerializer(serializers.ModelSerializer):

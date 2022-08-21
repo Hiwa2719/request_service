@@ -9,7 +9,7 @@ from .serializers import ProfileSerializer, UserCreationSerializer
 
 @api_view(['POST'])
 def register_view(request):
-    serializer = UserCreationSerializer(data=request.data)
+    serializer = UserCreationSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         user = serializer.save()
         serializer = ProfileSerializer(user.profile)
@@ -31,3 +31,8 @@ def login_view(request):
         serializer = ProfileSerializer(user.profile)
         return Response(serializer.data)
     return Response({'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view()
+def activate_email(request, uidb64, token):
+    pass

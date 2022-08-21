@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Email</title>
+</head>
+{% autoescape off %}
+    <p>Hi {{ user.email }},</p>
+    <p>Please click on the link to confirm your registration, http://{{ domain }}{% url 'accounts:activate-email' uidb64=uid token=token %}</p>
+    <p>If you think, it's not you, then just ignore this email.</p>
+{% endautoescape %}
+</body>
+</html>
