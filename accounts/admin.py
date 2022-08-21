@@ -9,7 +9,7 @@ class ProfileModelAdmin(admin.ModelAdmin):
     list_display = '__str__', 'type'
     list_editable = 'type',
     search_fields = '__str__', 'type'
-
+    list_filter = 'type',
     actions = ['make_golden', 'make_silver', 'make_typical']
 
     @admin.action(description='make selected as Golden')
