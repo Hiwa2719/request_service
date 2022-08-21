@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Profile, USER_TYPES
 
@@ -65,3 +66,16 @@ class ProfileSerializer(serializers.Serializer):
 
     def get_type(self, instance):
         return instance.get_type_display()
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
+
+    def validate(self, attrs):
+        self.username_field = 'username'
+        attrs['username'] = attrs['email']
+        data = super().validate(attrs)
+        del data['refresh']
+        serializer = UserSerializer(self.user)
+        data.update(serializer.data)
+        return data

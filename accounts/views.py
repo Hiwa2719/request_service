@@ -1,13 +1,12 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth import login
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .serializers import ProfileSerializer, UserCreationSerializer
+from .serializers import ProfileSerializer, UserCreationSerializer, MyTokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -22,20 +21,8 @@ def register_view(request):
     return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-def login_view(request):
-    data = {
-        'username': request.data.get('email'),
-        'password': request.data.get('password')
-    }
-
-    form = AuthenticationForm(data=data)
-    if form.is_valid():
-        user = form.get_user()
-        login(request, user)
-        serializer = ProfileSerializer(user.profile)
-        return Response(serializer.data)
-    return Response({'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+class LoginView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 @api_view()
