@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
-
+import uuid
 from services.models import Service, Wage
 
 User = get_user_model()
@@ -28,7 +28,7 @@ class Bill(models.Model):
         ('CK', 'Check'),
         ('FN', 'Finalized'),
     ]
-
+    bill_id = models.UUIDField(default=uuid.uuid4, editable=False, blank=True)
     service = models.ForeignKey(Service, on_delete=models.DO_NOTHING)
     state = models.CharField(max_length=2, choices=STATES, default='CR', blank=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -48,8 +48,11 @@ class Bill(models.Model):
 
 
 @receiver(pre_save, sender=Bill)
-def state_email_sender(sender, instance, update_fields, **kwargs):
-    bill = sender.objects.get(id=instance.id)
+def state_email_sender(sender, instance, **kwargs):
+    try:
+        bill = sender.objects.get(id=instance.id)
+    except Bill.DoesNotExist:
+        return
     if bill.state != instance.state and instance.state == 'DF':
         message = render_to_string('accounts/deficit_issue.html', {
             'bill': instance

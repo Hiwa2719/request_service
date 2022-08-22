@@ -12,6 +12,6 @@ class BillModelAdmin(admin.ModelAdmin):
         return queryset
 
     def get_readonly_fields(self, request, obj=None):
-        if request.user.has_perm('bills.only_check_bills'):
-            return ['service', 'user', 'user_extra_description', 'wage', 'photo', 'total_price']
+        if request.user.has_perm('bills.only_check_bills') and not request.user.is_superuser:
+            return ['bill_id', 'service', 'user', 'user_extra_description', 'wage', 'photo', 'total_price']
         return self.readonly_fields

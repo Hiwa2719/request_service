@@ -8,6 +8,7 @@
     <p>Dear {{ bill.user.email }},</p>
     <p>there is an issue with your last checked bill please go come back to http://127.0.0.1:800 and update your bill.</p>
     <p>this is our analyze about your bill: {{ bill.staff_extra_description }}</p>
+    <p>for this matter your bill id is: <strong>{{ bill.bill_id }}</strong></p>
     <p>If you think, it's not you, then just ignore this email.</p>
 {% endautoescape %}
 </body>
