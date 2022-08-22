@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from .serializers import ProfileSerializer, UserCreationSerializer, MyTokenObtainPairSerializer
 
 User = get_user_model()
@@ -24,6 +24,20 @@ def register_view(request):
 
 class LoginView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = {
+            'username': request.data.get('email'),
+            'password': request.data.get('password')
+        }
+        serializer = self.get_serializer(data=data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 @api_view()

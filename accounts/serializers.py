@@ -84,12 +84,8 @@ class ProfileSerializer(serializers.Serializer):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    username_field = 'email'
 
     def validate(self, attrs):
-        # todo update for valid token
-        self.username_field = 'username'
-        attrs['username'] = attrs['email']
         data = super().validate(attrs)
         del data['refresh']
         serializer = UserSerializer(self.user)
