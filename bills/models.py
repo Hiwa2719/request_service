@@ -1,6 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.template.loader import render_to_string
 
 from services.models import Service, Wage
 
@@ -41,3 +45,14 @@ class Bill(models.Model):
 
     def __str__(self):
         return f'{self.user.username}-{self.service.name}'
+
+
+@receiver(pre_save, sender=Bill)
+def state_email_sender(sender, instance, update_fields, **kwargs):
+    bill = sender.objects.get(id=instance.id)
+    if bill.state != instance.state and instance.state == 'DF':
+        message = render_to_string('accounts/deficit_issue.html', {
+            'bill': instance
+        })
+        send_mail(subject='Bill deficit', message='there is issue with your bill',
+                  from_email='hiahmadyan@gmail.com', recipient_list=[instance.user.email], html_message=message)
