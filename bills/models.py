@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -5,7 +7,7 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
-import uuid
+
 from services.models import Service, Wage
 
 User = get_user_model()
@@ -21,16 +23,18 @@ def max_size_validator(value):
         raise ValidationError('File too large. Size should not exceed 1 MB.')
 
 
+class BillStates(models.TextChoices):
+    CREATED = 'CR'
+    DEFICIT = 'DF'
+    CHECK = 'CK'
+    FINALIZED = 'FN'
+
+
 class Bill(models.Model):
-    STATES = [
-        ('CR', 'Created'),
-        ('DF', 'Deficit'),
-        ('CK', 'Check'),
-        ('FN', 'Finalized'),
-    ]
+
     bill_id = models.UUIDField(default=uuid.uuid4, editable=False, blank=True)
     service = models.ForeignKey(Service, on_delete=models.DO_NOTHING)
-    state = models.CharField(max_length=2, choices=STATES, default='CR', blank=True)
+    state = models.CharField(max_length=2, choices=BillStates.choices, default='CR', blank=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     user_extra_description = models.TextField(blank=True)
     staff_extra_description = models.TextField(blank=True)

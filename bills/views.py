@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from .models import BillStates
 from .permisssions import IsStaff
 from .serializers import BillSerializer
 
@@ -36,6 +37,6 @@ class BillViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.state in ['CK', 'FN']:
+        if instance.state in [BillStates.CHECK, BillStates.FINALIZED]:
             return Response({'error': 'Your are not allowed to delete this bill anymore'})
         return super().destroy(request, *args, **kwargs)
