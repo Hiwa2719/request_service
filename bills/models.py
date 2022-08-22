@@ -26,13 +26,13 @@ class Bill(models.Model):
     ]
 
     service = models.ForeignKey(Service, on_delete=models.DO_NOTHING)
-    state = models.CharField(max_length=2, choices=STATES)
+    state = models.CharField(max_length=2, choices=STATES, default='CR', blank=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    user_extra_description = models.TextField()
-    staff_extra_description = models.TextField()
-    wage = models.ForeignKey(Wage, on_delete=models.DO_NOTHING)
-    photo = models.ImageField(validators=[max_size_validator])
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    user_extra_description = models.TextField(blank=True)
+    staff_extra_description = models.TextField(blank=True)
+    wage = models.ForeignKey(Wage, on_delete=models.DO_NOTHING, blank=True)
+    photo = models.ImageField(validators=[max_size_validator], blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
