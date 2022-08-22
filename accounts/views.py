@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from .serializers import ProfileSerializer, UserCreationSerializer, MyTokenObtainPairSerializer
-
+from django.contrib.auth.forms import PasswordResetForm
 User = get_user_model()
 
 
@@ -75,4 +75,26 @@ def change_password(request):
     return Response({'error': 'Sorry Old password is wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-#  todo creating a view for password reset
+@api_view()
+def password_reset(request):
+    email = request.query_params.get('email')
+    form = PasswordResetForm({'email': email})
+    if form.is_valid():
+        opts = {
+            "use_https": request.is_secure(),
+            "token_generator": default_token_generator,
+            "from_email": None,
+            "email_template_name": "registration/password_reset_email.html",
+            "subject_template_name": "registration/password_reset_subject.txt",
+            "request": request,
+            "html_email_template_name": None,
+            "extra_email_context": None,
+        }
+        form.save(**opts)
+        return Response({'success': 'a token has been sent to your email, please check your inbox'})
+    return Response({'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view()
+def password_reset_confirm(request):
+    pass
