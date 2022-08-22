@@ -40,13 +40,18 @@ class LoginView(TokenObtainPairView):
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
-@api_view()
-def activate_email(request, uidb64, token):
+def get_user_from_uidb64(uidb64):
     try:
         pk = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=pk)
     except (User.DoesNotExist, TypeError, ValueError, OverflowError):
         user = None
+    return user
+
+
+@api_view()
+def activate_email(request, uidb64, token):
+    user = get_user_from_uidb64(uidb64)
 
     if user and not user.is_active and default_token_generator.check_token(user, token):
         user.is_active = True
@@ -95,6 +100,18 @@ def password_reset(request):
     return Response({'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view()
-def password_reset_confirm(request):
-    pass
+@api_view(['POST'])
+def password_reset_confirm(request, uidb64, token):
+    user = get_user_from_uidb64(uidb64)
+
+    if user and user.is_active and default_token_generator.check_token(user, token):
+        data = {
+            'email': user.email,
+            'password': request.data.get('password')
+        }
+        serializer = UserCreationSerializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': 'your password is now update'})
+        return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'error': 'Sorry provided link has issue'})
