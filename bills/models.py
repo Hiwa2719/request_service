@@ -36,5 +36,8 @@ class Bill(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        permissions = [('only_check_bills', 'can see only bills with check status')]
+
     def __str__(self):
         return f'{self.user.username}-{self.service.name}'
